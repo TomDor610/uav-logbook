@@ -1,7 +1,5 @@
 from django.contrib import admin
-from django.db import models
-from django_json_widget.widgets import JSONEditorWidget  # 🧩 Step 1: Import JSON editor
-
+from django import forms
 from .models import (
     Uav,
     Sort,
@@ -15,17 +13,32 @@ from .models import (
     UavWeightsControl,
     UavBalanceControl
 )
+import json
 
-# 🧩 Step 2: Custom admin class for Uav
+# Custom ModelForm for Uav to handle JSON safely
+class UavAdminForm(forms.ModelForm):
+    class Meta:
+        model = Uav
+        fields = '__all__'
+
+    def clean_lru_items(self):
+        data = self.cleaned_data.get('lru_items')
+        if isinstance(data, str):
+            try:
+                return json.loads(data)
+            except json.JSONDecodeError:
+                raise forms.ValidationError("Invalid JSON format.")
+        return data
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if 'lru_items' in self.initial and isinstance(self.initial['lru_items'], dict):
+            self.initial['lru_items'] = json.dumps(self.initial['lru_items'], indent=2)
+
 class UavAdmin(admin.ModelAdmin):
-    formfield_overrides = {
-        models.JSONField: {'widget': JSONEditorWidget}
-    }
+    form = UavAdminForm
 
-# 🧩 Step 3: Use the custom admin for Uav
 admin.site.register(Uav, UavAdmin)
-
-# Default registration for other models
 admin.site.register(Sort)
 admin.site.register(Malfunction)
 admin.site.register(Permit)
