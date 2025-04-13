@@ -1,0 +1,21 @@
+    # Python bytecode and logs
+__pycache__/
+*.py[cod]
+*.log
+
+# SQLite database (if you're using one temporarily)
+*.sqlite3
+
+# Django migration history or cache files
+*.pot
+*.pyc
+
+# Virtual environment
+venv/
+
+# VSCode project settings
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
